@@ -1,0 +1,2134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinanceFlow - Personal Finance Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #10b981;
+            --secondary-color: #059669;
+            --accent-color: #3b82f6;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --success-color: #10b981;
+            --dark-color: #1f2937;
+            --light-color: #f8fafc;
+            --text-color: #374151;
+            --border-color: #e5e7eb;
+            --shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.15);
+            --income-color: #10b981;
+            --expense-color: #ef4444;
+            --investment-color: #8b5cf6;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background: linear-gradient(135deg, #0f766e 0%, #059669 50%, #047857 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Navigation */
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            z-index: 1000;
+            padding: 1rem 0;
+            transition: all 0.3s ease;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .navbar.scrolled {
+            background: rgba(255, 255, 255, 0.98);
+            box-shadow: var(--shadow);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-color);
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--primary-color);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .mobile-menu {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+        }
+
+        .mobile-menu span {
+            width: 25px;
+            height: 3px;
+            background: var(--text-color);
+            margin: 3px 0;
+            transition: 0.3s;
+            border-radius: 2px;
+        }
+
+        /* Page Container */
+        .page {
+            display: none;
+            min-height: 100vh;
+            padding-top: 80px;
+            animation: fadeIn 0.6s ease-in-out;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Home Page */
+        .hero {
+            text-align: center;
+            padding: 4rem 0;
+            color: white;
+        }
+
+        .hero h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            opacity: 0;
+            animation: slideInUp 1s ease 0.2s forwards;
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+            opacity: 0;
+            animation: slideInUp 1s ease 0.4s forwards;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            opacity: 0;
+            animation: slideInUp 1s ease 0.6s forwards;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: var(--accent-color);
+            color: white;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        /* Features Section */
+        .features {
+            background: white;
+            padding: 4rem 0;
+            margin-top: 2rem;
+            border-radius: 20px 20px 0 0;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid var(--border-color);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .feature-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 2rem;
+            color: white;
+        }
+
+        /* Dashboard Styles */
+        .dashboard-header {
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+        }
+
+        .stat-card.income::before {
+            background: var(--income-color);
+        }
+
+        .stat-card.expense::before {
+            background: var(--expense-color);
+        }
+
+        .stat-card.investment::before {
+            background: var(--investment-color);
+        }
+
+        .stat-card.savings::before {
+            background: var(--accent-color);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-number.income {
+            color: var(--income-color);
+        }
+
+        .stat-number.expense {
+            color: var(--expense-color);
+        }
+
+        .stat-number.investment {
+            color: var(--investment-color);
+        }
+
+        .stat-number.savings {
+            color: var(--accent-color);
+        }
+
+        .stat-label {
+            color: var(--text-color);
+            font-weight: 500;
+        }
+
+        /* Form Styles */
+        .form-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 0.75rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+
+        /* Transaction Cards */
+        .transaction-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+            border-left: 4px solid;
+        }
+
+        .transaction-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .transaction-card.income {
+            border-left-color: var(--income-color);
+        }
+
+        .transaction-card.expense {
+            border-left-color: var(--expense-color);
+        }
+
+        .transaction-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .transaction-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-color);
+        }
+
+        .transaction-amount {
+            font-size: 1.5rem;
+            font-weight: 800;
+        }
+
+        .transaction-amount.income {
+            color: var(--income-color);
+        }
+
+        .transaction-amount.expense {
+            color: var(--expense-color);
+        }
+
+        .transaction-meta {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        /* Budget Cards */
+        .budget-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .budget-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .budget-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .budget-category {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-color);
+        }
+
+        .budget-amounts {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        /* Progress Bars */
+        .progress-container {
+            background: var(--border-color);
+            border-radius: 10px;
+            height: 8px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+
+        .progress-bar {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.8s ease;
+        }
+
+        .progress-bar.income {
+            background: linear-gradient(90deg, var(--income-color), #34d399);
+        }
+
+        .progress-bar.expense {
+            background: linear-gradient(90deg, var(--expense-color), #f87171);
+        }
+
+        .progress-bar.budget {
+            background: linear-gradient(90deg, var(--accent-color), #60a5fa);
+        }
+
+        /* Chart Container */
+        .chart-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .chart-placeholder {
+            width: 100%;
+            height: 300px;
+            background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 1.2rem;
+            margin-top: 1rem;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: slideInUp 0.3s ease;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-color);
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .close-btn:hover {
+            background: var(--border-color);
+        }
+
+        /* Goal Cards */
+        .goal-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .goal-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .goal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .goal-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-color);
+        }
+
+        .goal-target {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--accent-color);
+        }
+
+        /* Investment Cards */
+        .investment-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+            border-left: 4px solid var(--investment-color);
+        }
+
+        .investment-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .investment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .investment-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-color);
+        }
+
+        .investment-value {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--investment-color);
+        }
+
+        .investment-change {
+            font-weight: 600;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .investment-change.positive {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success-color);
+        }
+
+        .investment-change.negative {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger-color);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .animate-pulse {
+            animation: pulse 2s infinite;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                width: 100%;
+                background: white;
+                flex-direction: column;
+                padding: 1rem;
+                box-shadow: var(--shadow);
+                border-radius: 0 0 16px 16px;
+            }
+
+            .nav-links.active {
+                display: flex;
+            }
+
+            .mobile-menu {
+                display: flex;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .dashboard-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .hero p {
+                font-size: 1.1rem;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Success/Error Messages */
+        .message {
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            font-weight: 500;
+            animation: slideInUp 0.3s ease;
+        }
+
+        .message-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success-color);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .message-error {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger-color);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+
+        .quick-action-btn {
+            flex: 1;
+            min-width: 200px;
+            padding: 1.5rem;
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: var(--text-color);
+        }
+
+        .quick-action-btn:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .quick-action-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <div class="logo">FinanceFlow</div>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#" onclick="showPage('home')" class="active">Home</a></li>
+                <li><a href="#" onclick="showPage('dashboard')">Dashboard</a></li>
+                <li><a href="#" onclick="showPage('transactions')">Transactions</a></li>
+                <li><a href="#" onclick="showPage('budget')">Budget</a></li>
+                <li><a href="#" onclick="showPage('investments')">Investments</a></li>
+                <li><a href="#" onclick="showPage('goals')">Goals</a></li>
+            </ul>
+            <div class="mobile-menu" id="mobileMenu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Home Page -->
+    <div id="home" class="page active">
+        <div class="hero">
+            <div class="container">
+                <h1>FinanceFlow</h1>
+                <p>Take control of your financial future with intelligent money management</p>
+                <div class="cta-buttons">
+                    <a href="#" onclick="showPage('dashboard')" class="btn btn-primary">
+                        💰 Start Tracking
+                    </a>
+                    <a href="#" onclick="showPage('budget')" class="btn btn-secondary">
+                        📊 Create Budget
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="features">
+            <div class="container">
+                <h2 style="text-align: center; font-size: 2.5rem; margin-bottom: 1rem; color: var(--text-color);">
+                    Complete Financial Management
+                </h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">💳</div>
+                        <h3>Expense Tracking</h3>
+                        <p>Monitor your spending with detailed categorization and smart insights to optimize your budget.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📈</div>
+                        <h3>Investment Portfolio</h3>
+                        <p>Track your investments, monitor performance, and make informed decisions for wealth building.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🎯</div>
+                        <h3>Financial Goals</h3>
+                        <p>Set and achieve your financial objectives with progress tracking and milestone celebrations.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Page -->
+    <div id="dashboard" class="page">
+        <div class="container">
+            <div class="dashboard-header">
+                <div>
+                    <h1>Financial Dashboard</h1>
+                    <p>Your complete financial overview at a glance</p>
+                </div>
+                <button class="btn btn-primary" onclick="openModal('quickAddModal')">
+                    ➕ Quick Add
+                </button>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card income">
+                    <div class="stat-number income" id="totalIncome">$5,240</div>
+                    <div class="stat-label">Monthly Income</div>
+                </div>
+                <div class="stat-card expense">
+                    <div class="stat-number expense" id="totalExpenses">$3,180</div>
+                    <div class="stat-label">Monthly Expenses</div>
+                </div>
+                <div class="stat-card savings">
+                    <div class="stat-number savings" id="totalSavings">$2,060</div>
+                    <div class="stat-label">Net Savings</div>
+                </div>
+                <div class="stat-card investment">
+                    <div class="stat-number investment" id="totalInvestments">$15,750</div>
+                    <div class="stat-label">Investment Portfolio</div>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+                <div class="chart-container">
+                    <h3>Spending Overview</h3>
+                    <div class="chart-placeholder">
+                        📊 Interactive spending chart would be displayed here
+                    </div>
+                </div>
+
+                <div class="form-container">
+                    <h3 style="margin-bottom: 1rem;">Quick Stats</h3>
+                    <div style="margin-bottom: 1rem;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span>Savings Rate</span>
+                            <span style="font-weight: 600; color: var(--success-color);">39%</span>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-bar income" style="width: 39%;"></div>
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 1rem;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span>Budget Usage</span>
+                            <span style="font-weight: 600; color: var(--warning-color);">72%</span>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-bar budget" style="width: 72%;"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span>Goal Progress</span>
+                            <span style="font-weight: 600; color: var(--accent-color);">65%</span>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-bar budget" style="width: 65%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                <div class="form-container">
+                    <h3 style="margin-bottom: 1rem;">Recent Transactions</h3>
+                    <div id="recentTransactions">
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid var(--border-color);">
+                            <div>
+                                <div style="font-weight: 600;">Grocery Shopping</div>
+                                <div style="font-size: 0.9rem; color: #666;">Food & Dining • Today</div>
+                            </div>
+                            <div style="font-weight: 700; color: var(--expense-color);">-$127.50</div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid var(--border-color);">
+                            <div>
+                                <div style="font-weight: 600;">Salary Deposit</div>
+                                <div style="font-size: 0.9rem; color: #666;">Income • Yesterday</div>
+                            </div>
+                            <div style="font-weight: 700; color: var(--income-color);">+$2,500.00</div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0;">
+                            <div>
+                                <div style="font-weight: 600;">Netflix Subscription</div>
+                                <div style="font-size: 0.9rem; color: #666;">Entertainment • 2 days ago</div>
+                            </div>
+                            <div style="font-weight: 700; color: var(--expense-color);">-$15.99</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-container">
+                    <h3 style="margin-bottom: 1rem;">Upcoming Bills</h3>
+                    <div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid var(--border-color);">
+                            <div>
+                                <div style="font-weight: 600;">Rent Payment</div>
+                                <div style="font-size: 0.9rem; color: #666;">Due in 3 days</div>
+                            </div>
+                            <div style="font-weight: 700; color: var(--expense-color);">$1,200.00</div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid var(--border-color);">
+                            <div>
+                                <div style="font-weight: 600;">Electric Bill</div>
+                                <div style="font-size: 0.9rem; color: #666;">Due in 5 days</div>
+                            </div>
+                            <div style="font-weight: 700; color: var(--expense-color);">$89.50</div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0;">
+                            <div>
+                                <div style="font-weight: 600;">Car Insurance</div>
+                                <div style="font-size: 0.9rem; color: #666;">Due in 1 week</div>
+                            </div>
+                            <div style="font-weight: 700; color: var(--expense-color);">$156.00</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transactions Page -->
+    <div id="transactions" class="page">
+        <div class="container">
+            <div class="dashboard-header">
+                <div>
+                    <h1>Transactions</h1>
+                    <p>Track and manage all your financial transactions</p>
+                </div>
+                <div style="display: flex; gap: 1rem;">
+                    <button class="btn btn-success" onclick="openModal('incomeModal')">
+                        ➕ Add Income
+                    </button>
+                    <button class="btn btn-danger" onclick="openModal('expenseModal')">
+                        ➖ Add Expense
+                    </button>
+                </div>
+            </div>
+
+            <div class="quick-actions">
+                <div class="quick-action-btn" onclick="filterTransactions('all')">
+                    <span class="quick-action-icon">📋</span>
+                    <div>All Transactions</div>
+                </div>
+                <div class="quick-action-btn" onclick="filterTransactions('income')">
+                    <span class="quick-action-icon">💰</span>
+                    <div>Income Only</div>
+                </div>
+                <div class="quick-action-btn" onclick="filterTransactions('expense')">
+                    <span class="quick-action-icon">💳</span>
+                    <div>Expenses Only</div>
+                </div>
+            </div>
+
+            <div id="transactionsList">
+                <div class="transaction-card income">
+                    <div class="transaction-header">
+                        <div>
+                            <div class="transaction-title">Monthly Salary</div>
+                            <div class="transaction-meta">
+                                <span>💼 Income</span>
+                                <span>📅 Dec 1, 2024</span>
+                                <span>🏦 Bank Transfer</span>
+                            </div>
+                        </div>
+                        <div class="transaction-amount income">+$4,500.00</div>
+                    </div>
+                    <p>Regular monthly salary deposit from employer</p>
+                    <div style="margin-top: 1rem; display: flex; gap: 0.5rem;">
+                        <button class="btn" style="padding: 0.5rem 1rem; background: var(--border-color); color: var(--text-color);" onclick="editTransaction(this)">Edit</button>
+                        <button class="btn" style="padding: 0.5rem 1rem; background: var(--danger-color); color: white;" onclick="deleteTransaction(this)">Delete</button>
+                    </div>
+                </div>
+
+                <div class="transaction-card expense">
+                    <div class="transaction-header">
+                        <div>
+                            <div class="transaction-title">Grocery Shopping</div>
+                            <div class="transaction-meta">
+                                <span>🛒 Food & Dining</span>
+                                <span>📅 Dec 10, 2024</span>
+                                <span>💳 Credit Card</span>
+                            </div>
+                        </div>
+                        <div class="transaction-amount expense">-$127.50</div>
+                    </div>
+                    <p>Weekly grocery shopping at Whole Foods Market</p>
+                    <div style="margin-top: 1rem; display: flex; gap: 0.5rem;">
+                        <button class="btn" style="padding: 0.5rem 1rem; background: var(--border-color); color: var(--text-color);" onclick="editTransaction(this)">Edit</button>
+                        <button class="btn" style="padding: 0.5rem 1rem; background: var(--danger-color); color: white;" onclick="deleteTransaction(this)">Delete</button>
+                    </div>
+                </div>
+
+                <div class="transaction-card expense">
+                    <div class="transaction-header">
+                        <div>
+                            <div class="transaction-title">Gas Station</div>
+                            <div class="transaction-meta">
+                                <span>⛽ Transportation</span>
+                                <span>📅 Dec 9, 2024</span>
+                                <span>💳 Debit Card</span>
+                            </div>
+                        </div>
+                        <div class="transaction-amount expense">-$45.20</div>
+                    </div>
+                    <p>Fuel for weekly commute</p>
+                    <div style="margin-top: 1rem; display: flex; gap: 0.5rem;">
+                        <button class="btn" style="padding: 0.5rem 1rem; background: var(--border-color); color: var(--text-color);" onclick="editTransaction(this)">Edit</button>
+                        <button class="btn" style="padding: 0.5rem 1rem; background: var(--danger-color); color: white;" onclick="deleteTransaction(this)">Delete</button>
+                    </div>
+                </div>
+
+                <div class="transaction-card income">
+                    <div class="transaction-header">
+                        <div>
+                            <div class="transaction-title">Freelance Project</div>
+                            <div class="transaction-meta">
+                                <span>💻 Side Income</span>
+                                <span>📅 Dec 8, 2024</span>
+                                <span>🏦 PayPal</span>
+                            </div>
+                        </div>
+                        <div class="transaction-amount income">+$750.00</div>
+                    </div>
+                    <p>Web development project completion payment</p>
+                    <div style="margin-top: 1rem; display: flex; gap: 0.5rem;">
+                        <button class="btn" style="padding: 0.5rem 1rem; background: var(--border-color); color: var(--text-color);" onclick="editTransaction(this)">Edit</button>
+                        <button class="btn" style="padding: 0.5rem 1rem; background: var(--danger-color); color: white;" onclick="deleteTransaction(this)">Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Budget Page -->
+    <div id="budget" class="page">
+        <div class="container">
+            <div class="dashboard-header">
+                <div>
+                    <h1>Budget Management</h1>
+                    <p>Plan and track your spending across categories</p>
+                </div>
+                <button class="btn btn-primary" onclick="openModal('budgetModal')">
+                    ➕ Add Budget Category
+                </button>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 300px; gap: 2rem;">
+                <div>
+                    <div id="budgetList">
+                        <div class="budget-card">
+                            <div class="budget-header">
+                                <div class="budget-category">🍕 Food & Dining</div>
+                                <div style="font-size: 0.9rem; color: #666;">Monthly Budget</div>
+                            </div>
+                            <div class="budget-amounts">
+                                <span>Spent: <strong style="color: var(--expense-color);">$420.50</strong></span>
+                                <span>Budget: <strong>$600.00</strong></span>
+                                <span>Remaining: <strong style="color: var(--success-color);">$179.50</strong></span>
+                            </div>
+                            <div class="progress-container">
+                                <div class="progress-bar expense" style="width: 70%;"></div>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
+                                <span style="font-size: 0.9rem; color: #666;">70% used</span>
+                                <div>
+                                    <button class="btn" style="padding: 0.5rem 1rem; background: var(--border-color); color: var(--text-color); margin-right: 0.5rem;" onclick="editBudget(this)">Edit</button>
+                                    <button class="btn" style="padding: 0.5rem 1rem; background: var(--success-color); color: white;" onclick="addToBudget(this)">Add Funds</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="budget-card">
+                            <div class="budget-header">
+                                <div class="budget-category">🚗 Transportation</div>
+                                <div style="font-size: 0.9rem; color: #666;">Monthly Budget</div>
+                            </div>
+                            <div class="budget-amounts">
+                                <span>Spent: <strong style="color: var(--expense-color);">$280.75</strong></span>
+                                <span>Budget: <strong>$400.00</strong></span>
+                                <span>Remaining: <strong style="color: var(--success-color);">$119.25</strong></span>
+                            </div>
+                            <div class="progress-container">
+                                <div class="progress-bar expense" style="width: 70%;"></div>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
+                                <span style="font-size: 0.9rem; color: #666;">70% used</span>
+                                <div>
+                                    <button class="btn" style="padding: 0.5rem 1rem; background: var(--border-color); color: var(--text-color); margin-right: 0.5rem;" onclick="editBudget(this)">Edit</button>
+                                    <button class="btn" style="padding: 0.5rem 1rem; background: var(--success-color); color: white;" onclick="addToBudget(this)">Add Funds</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="budget-card">
+                            <div class="budget-header">
+                                <div class="budget-category">🎬 Entertainment</div>
+                                <div style="font-size: 0.9rem; color: #666;">Monthly Budget</div>
+                            </div>
+                            <div class="budget-amounts">
+                                <span>Spent: <strong style="color: var(--expense-color);">$95.50</strong></span>
+                                <span>Budget: <strong>$200.00</strong></span>
+                                <span>Remaining: <strong style="color: var(--success-color);">$104.50</strong></span>
+                            </div>
+                            <div class="progress-container">
+                                <div class="progress-bar budget" style="width: 48%;"></div>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
+                                <span style="font-size: 0.9rem; color: #666;">48% used</span>
+                                <div>
+                                    <button class="btn" style="padding: 0.5rem 1rem; background: var(--border-color); color: var(--text-color); margin-right: 0.5rem;" onclick="editBudget(this)">Edit</button>
+                                    <button class="btn" style="padding: 0.5rem 1rem; background: var(--success-color); color: white;" onclick="addToBudget(this)">Add Funds</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="budget-card">
+                            <div class="budget-header">
+                                <div class="budget-category">🏠 Housing</div>
+                                <div style="font-size: 0.9rem; color: #666;">Monthly Budget</div>
+                            </div>
+                            <div class="budget-amounts">
+                                <span>Spent: <strong style="color: var(--expense-color);">$1,350.00</strong></span>
+                                <span>Budget: <strong>$1,400.00</strong></span>
+                                <span>Remaining: <strong style="color: var(--success-color);">$50.00</strong></span>
+                            </div>
+                            <div class="progress-container">
+                                <div class="progress-bar expense" style="width: 96%;"></div>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
+                                <span style="font-size: 0.9rem; color: var(--warning-color);"⚠️ 96% used</span>
+                                <div>
+                                    <button class="btn" style="padding: 0.5rem 1rem; background: var(--border-color); color: var(--text-color); margin-right: 0.5rem;" onclick="editBudget(this)">Edit</button>
+                                    <button class="btn" style="padding: 0.5rem 1rem; background: var(--success-color); color: white;" onclick="addToBudget(this)">Add Funds</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="form-container">
+                        <h3 style="margin-bottom: 1rem;">Budget Summary</h3>
+                        <div style="text-align: center; margin-bottom: 2rem;">
+                            <div style="font-size: 2.5rem; font-weight: 800; color: var(--success-color);">$2,060</div>
+                            <div style="color: #666;">Remaining This Month</div>
+                        </div>
+                        
+                        <div style="margin-bottom: 1rem;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                <span>Total Budget</span>
+                                <span style="font-weight: 600;">$4,200</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                <span>Total Spent</span>
+                                <span style="font-weight: 600; color: var(--expense-color);">$2,140</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                                <span>Remaining</span>
+                                <span style="font-weight: 600; color: var(--success-color);">$2,060</span>
+                            </div>
+                            <div class="progress-container">
+                                <div class="progress-bar expense" style="width: 51%;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-container" style="margin-top: 1rem;">
+                        <h3 style="margin-bottom: 1rem;">Category Breakdown</h3>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span>🏠 Housing</span>
+                            <span>32%</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span>🍕 Food</span>
+                            <span>20%</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span>🚗 Transport</span>
+                            <span>13%</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span>🎬 Entertainment</span>
+                            <span>4%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Investments Page -->
+    <div id="investments" class="page">
+        <div class="container">
+            <div class="dashboard-header">
+                <div>
+                    <h1>Investment Portfolio</h1>
+                    <p>Track your investments and monitor performance</p>
+                </div>
+                <button class="btn btn-primary" onclick="openModal('investmentModal')">
+                    ➕ Add Investment
+                </button>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+                <div class="chart-container">
+                    <h3>Portfolio Performance</h3>
+                    <div class="chart-placeholder">
+                        📈 Interactive portfolio performance chart would be displayed here
+                    </div>
+                </div>
+
+                <div class="form-container">
+                    <h3 style="margin-bottom: 1rem;">Portfolio Summary</h3>
+                    <div style="text-align: center; margin-bottom: 2rem;">
+                        <div style="font-size: 2.5rem; font-weight: 800; color: var(--investment-color);">$15,750</div>
+                        <div style="color: #666;">Total Portfolio Value</div>
+                        <div style="margin-top: 0.5rem;">
+                            <span class="investment-change positive">+$1,250 (+8.6%)</span>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span>Today's Change</span>
+                            <span style="font-weight: 600; color: var(--success-color);">+$125.50</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span>Total Invested</span>
+                            <span style="font-weight: 600;">$14,500</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span>Total Gain/Loss</span>
+                            <span style="font-weight: 600; color: var(--success-color);">+$1,250</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="investmentsList">
+                <div class="investment-card">
+                    <div class="investment-header">
+                        <div>
+                            <div class="investment-name">Apple Inc. (AAPL)</div>
+                            <div style="color: #666; margin-top: 0.5rem;">25 shares • Technology</div>
+                        </div>
+                        <div>
+                            <div class="investment-value">$4,875.00</div>
+                            <div class="investment-change positive">+$125.50 (+2.6%)</div>
+                        </div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                        <span>Avg. Cost: $185.00</span>
+                        <span>Current: $195.00</span>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-bar income" style="width: 31%;"></div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
+                        <span style="font-size: 0.9rem; color: #666;">31% of portfolio</span>
+                        <div>
+                            <button class="btn" style="padding: 0.5rem 1rem; background: var(--success-color); color: white; margin-right: 0.5rem;" onclick="buyMore(this)">Buy More</button>
+                            <button class="btn" style="padding: 0.5rem 1rem; background: var(--danger-color); color: white;" onclick="sellInvestment(this)">Sell</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="investment-card">
+                    <div class="investment-header">
+                        <div>
+                            <div class="investment-name">S&P 500 ETF (SPY)</div>
+                            <div style="color: #666; margin-top: 0.5rem;">15 shares • Index Fund</div>
+                        </div>
+                        <div>
+                            <div class="investment-value">$6,750.00</div>
+                            <div class="investment-change positive">+$75.25 (+1.1%)</div>
+                        </div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                        <span>Avg. Cost: $440.00</span>
+                        <span>Current: $450.00</span>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-bar income" style="width: 43%;"></div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
+                        <span style="font-size: 0.9rem; color: #666;">43% of portfolio</span>
+                        <div>
+                            <button class="btn" style="padding: 0.5rem 1rem; background: var(--success-color); color: white; margin-right: 0.5rem;" onclick="buyMore(this)">Buy More</button>
+                            <button class="btn" style="padding: 0.5rem 1rem; background: var(--danger-color); color: white;" onclick="sellInvestment(this)">Sell</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="investment-card">
+                    <div class="investment-header">
+                        <div>
+                            <div class="investment-name">Tesla Inc. (TSLA)</div>
+                            <div style="color: #666; margin-top: 0.5rem;">8 shares • Electric Vehicles</div>
+                        </div>
+                        <div>
+                            <div class="investment-value">$2,040.00</div>
+                            <div class="investment-change negative">-$32.00 (-1.5%)</div>
+                        </div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                        <span>Avg. Cost: $260.00</span>
+                        <span>Current: $255.00</span>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-bar expense" style="width: 13%;"></div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
+                        <span style="font-size: 0.9rem; color: #666;">13% of portfolio</span>
+                        <div>
+                            <button class="btn" style="padding: 0.5rem 1rem; background: var(--success-color); color: white; margin-right: 0.5rem;" onclick="buyMore(this)">Buy More</button>
+                            <button class="btn" style="padding: 0.5rem 1rem; background: var(--danger-color); color: white;" onclick="sellInvestment(this)">Sell</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="investment-card">
+                    <div class="investment-header">
+                        <div>
+                            <div class="investment-name">Bitcoin (BTC)</div>
+                            <div style="color: #666; margin-top: 0.5rem;">0.05 BTC • Cryptocurrency</div>
+                        </div>
+                        <div>
+                            <div class="investment-value">$2,085.00</div>
+                            <div class="investment-change positive">+$85.00 (+4.2%)</div>
+                        </div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                        <span>Avg. Cost: $40,000</span>
+                        <span>Current: $41,700</span>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-bar income" style="width: 13%;"></div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
+                        <span style="font-size: 0.9rem; color: #666;">13% of portfolio</span>
+                        <div>
+                            <button class="btn" style="padding: 0.5rem 1rem; background: var(--success-color); color: white; margin-right: 0.5rem;" onclick="buyMore(this)">Buy More</button>
+                            <button class="btn" style="padding: 0.5rem 1rem; background: var(--danger-color); color: white;" onclick="sellInvestment(this)">Sell</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Goals Page -->
+    <div id="goals" class="page">
+        <div class="container">
+            <div class="dashboard-header">
+                <div>
+                    <h1>Financial Goals</h1>
+                    <p>Set, track, and achieve your financial objectives</p>
+                </div>
+                <button class="btn btn-primary" onclick="openModal('goalModal')">
+                    ➕ Add Goal
+                </button>
+            </div>
+
+            <div id="goalsList">
+                <div class="goal-card">
+                    <div class="goal-header">
+                        <div>
+                            <div class="goal-title">🏠 Emergency Fund</div>
+                            <div style="color: #666; margin-top: 0.5rem;">Save for 6 months of expenses</div>
+                        </div>
+                        <div class="goal-target">$15,000</div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                        <span>Saved: <strong style="color: var(--success-color);">$9,750</strong></span>
+                        <span>Remaining: <strong>$5,250</strong></span>
+                        <span>Target Date: <strong>Dec 2025</strong></span>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-bar budget" style="width: 65%;"></div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
+                        <span style="font-size: 0.9rem; color: #666;">65% complete • On track!</span>
+                        <div>
+                            <button class="btn" style="padding: 0.5rem 1rem; background: var(--success-color); color: white; margin-right: 0.5rem;" onclick="addToGoal(this)">Add Money</button>
+                            <button class="btn" style="padding: 0.5rem 1rem; background: var(--border-color); color: var(--text-color);" onclick="editGoal(this)">Edit</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="goal-card">
+                    <div class="goal-header">
+                        <div>
+                            <div class="goal-title">🚗 New Car</div>
+                            <div style="color: #666; margin-top: 0.5rem;">Save for a reliable vehicle</div>
+                        </div>
+                        <div class="goal-target">$25,000</div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                        <span>Saved: <strong style="color: var(--success-color);">$8,500</strong></span>
+                        <span>Remaining: <strong>$16,500</strong></span>
+                        <span>Target Date: <strong>Jun 2025</strong></span>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-bar budget" style="width: 34%;"></div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
+                        <span style="font-size: 0.9rem; color: #666;">34% complete • Need $550/month</span>
+                        <div>
+                            <button class="btn" style="padding: 0.5rem 1rem; background: var(--success-color); color: white; margin-right: 0.5rem;" onclick="addToGoal(this)">Add Money</button>
+                            <button class="btn" style="padding: 0.5rem 1rem; background: var(--border-color); color: var(--text-color);" onclick="editGoal(this)">Edit</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="goal-card">
+                    <div class="goal-header">
+                        <div>
+                            <div class="goal-title">🏖️ Vacation Fund</div>
+                            <div style="color: #666; margin-top: 0.5rem;">European vacation next summer</div>
+                        </div>
+                        <div class="goal-target">$5,000</div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                        <span>Saved: <strong style="color: var(--success-color);">$3,200</strong></span>
+                        <span>Remaining: <strong>$1,800</strong></span>
+                        <span>Target Date: <strong>Jul 2025</strong></span>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-bar budget" style="width: 64%;"></div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
+                        <span style="font-size: 0.9rem; color: #666;">64% complete • Ahead of schedule!</span>
+                        <div>
+                            <button class="btn" style="padding: 0.5rem 1rem; background: var(--success-color); color: white; margin-right: 0.5rem;" onclick="addToGoal(this)">Add Money</button>
+                            <button class="btn" style="padding: 0.5rem 1rem; background: var(--border-color); color: var(--text-color);" onclick="editGoal(this)">Edit</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="goal-card">
+                    <div class="goal-header">
+                        <div>
+                            <div class="goal-title">🎓 Education Fund</div>
+                            <div style="color: #666; margin-top: 0.5rem;">Master's degree program</div>
+                        </div>
+                        <div class="goal-target">$40,000</div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                        <span>Saved: <strong style="color: var(--success-color);">$12,000</strong></span>
+                        <span>Remaining: <strong>$28,000</strong></span>
+                        <span>Target Date: <strong>Sep 2026</strong></span>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-bar budget" style="width: 30%;"></div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
+                        <span style="font-size: 0.9rem; color: #666;">30% complete • Need $1,270/month</span>
+                        <div>
+                            <button class="btn" style="padding: 0.5rem 1rem; background: var(--success-color); color: white; margin-right: 0.5rem;" onclick="addToGoal(this)">Add Money</button>
+                            <button class="btn" style="padding: 0.5rem 1rem; background: var(--border-color); color: var(--text-color);" onclick="editGoal(this)">Edit</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="quickAddModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Quick Add Transaction</h3>
+                <button class="close-btn" onclick="closeModal('quickAddModal')">&times;</button>
+            </div>
+            <form id="quickAddForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="quickType">Type</label>
+                        <select id="quickType" required>
+                            <option value="">Select type...</option>
+                            <option value="income">Income</option>
+                            <option value="expense">Expense</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="quickAmount">Amount ($)</label>
+                        <input type="number" id="quickAmount" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="quickDescription">Description</label>
+                        <input type="text" id="quickDescription" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="quickCategory">Category</label>
+                        <select id="quickCategory" required>
+                            <option value="">Select category...</option>
+                            <option value="food">Food & Dining</option>
+                            <option value="transport">Transportation</option>
+                            <option value="entertainment">Entertainment</option>
+                            <option value="housing">Housing</option>
+                            <option value="salary">Salary</option>
+                            <option value="freelance">Freelance</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Add Transaction</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="incomeModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add Income</h3>
+                <button class="close-btn" onclick="closeModal('incomeModal')">&times;</button>
+            </div>
+            <form id="incomeForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="incomeAmount">Amount ($)</label>
+                        <input type="number" id="incomeAmount" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="incomeSource">Source</label>
+                        <input type="text" id="incomeSource" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="incomeCategory">Category</label>
+                        <select id="incomeCategory" required>
+                            <option value="salary">Salary</option>
+                            <option value="freelance">Freelance</option>
+                            <option value="investment">Investment Returns</option>
+                            <option value="bonus">Bonus</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="incomeDate">Date</label>
+                        <input type="date" id="incomeDate" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="incomeNotes">Notes</label>
+                    <textarea id="incomeNotes" rows="3"></textarea>
+                </div>
+                <button type="submit" class="btn btn-success" style="width: 100%; margin-top: 1rem;">Add Income</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="expenseModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add Expense</h3>
+                <button class="close-btn" onclick="closeModal('expenseModal')">&times;</button>
+            </div>
+            <form id="expenseForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="expenseAmount">Amount ($)</label>
+                        <input type="number" id="expenseAmount" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="expenseDescription">Description</label>
+                        <input type="text" id="expenseDescription" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="expenseCategory">Category</label>
+                        <select id="expenseCategory" required>
+                            <option value="food">Food & Dining</option>
+                            <option value="transport">Transportation</option>
+                            <option value="entertainment">Entertainment</option>
+                            <option value="housing">Housing</option>
+                            <option value="utilities">Utilities</option>
+                            <option value="healthcare">Healthcare</option>
+                            <option value="shopping">Shopping</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="expenseDate">Date</label>
+                        <input type="date" id="expenseDate" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="expenseNotes">Notes</label>
+                    <textarea id="expenseNotes" rows="3"></textarea>
+                </div>
+                <button type="submit" class="btn btn-danger" style="width: 100%; margin-top: 1rem;">Add Expense</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="budgetModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add Budget Category</h3>
+                <button class="close-btn" onclick="closeModal('budgetModal')">&times;</button>
+            </div>
+            <form id="budgetForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="budgetCategory">Category</label>
+                        <input type="text" id="budgetCategory" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="budgetAmount">Monthly Budget ($)</label>
+                        <input type="number" id="budgetAmount" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="budgetIcon">Icon</label>
+                        <select id="budgetIcon">
+                            <option value="🍕">🍕 Food</option>
+                            <option value="🚗">🚗 Transportation</option>
+                            <option value="🎬">🎬 Entertainment</option>
+                            <option value="🏠">🏠 Housing</option>
+                            <option value="💡">💡 Utilities</option>
+                            <option value="🛒">🛒 Shopping</option>
+                            <option value="💊">💊 Healthcare</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="budgetPeriod">Period</label>
+                        <select id="budgetPeriod">
+                            <option value="monthly">Monthly</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="yearly">Yearly</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Create Budget</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="investmentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add Investment</h3>
+                <button class="close-btn" onclick="closeModal('investmentModal')">&times;</button>
+            </div>
+            <form id="investmentForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="investmentSymbol">Symbol/Name</label>
+                        <input type="text" id="investmentSymbol" placeholder="e.g., AAPL, Bitcoin" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="investmentShares">Shares/Amount</label>
+                        <input type="number" id="investmentShares" step="0.001" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="investmentPrice">Purchase Price ($)</label>
+                        <input type="number" id="investmentPrice" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="investmentDate">Purchase Date</label>
+                        <input type="date" id="investmentDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="investmentType">Type</label>
+                        <select id="investmentType" required>
+                            <option value="stock">Stock</option>
+                            <option value="etf">ETF</option>
+                            <option value="crypto">Cryptocurrency</option>
+                            <option value="bond">Bond</option>
+                            <option value="mutual-fund">Mutual Fund</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="investmentSector">Sector</label>
+                        <input type="text" id="investmentSector" placeholder="e.g., Technology, Healthcare">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Add Investment</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="goalModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add Financial Goal</h3>
+                <button class="close-btn" onclick="closeModal('goalModal')">&times;</button>
+            </div>
+            <form id="goalForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="goalName">Goal Name</label>
+                        <input type="text" id="goalName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="goalTarget">Target Amount ($)</label>
+                        <input type="number" id="goalTarget" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="goalCurrent">Current Amount ($)</label>
+                        <input type="number" id="goalCurrent" step="0.01" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="goalDate">Target Date</label>
+                        <input type="date" id="goalDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="goalIcon">Icon</label>
+                        <select id="goalIcon">
+                            <option value="🏠">🏠 House</option>
+                            <option value="🚗">🚗 Car</option>
+                            <option value="🏖️">🏖️ Vacation</option>
+                            <option value="🎓">🎓 Education</option>
+                            <option value="💰">💰 Emergency Fund</option>
+                            <option value="💍">💍 Wedding</option>
+                            <option value="👶">👶 Baby</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="goalPriority">Priority</label>
+                        <select id="goalPriority">
+                            <option value="high">High</option>
+                            <option value="medium">Medium</option>
+                            <option value="low">Low</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="goalDescription">Description</label>
+                    <textarea id="goalDescription" rows="3"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Create Goal</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentPage = 'home';
+
+        // Navigation functionality
+        function showPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // Show selected page
+            document.getElementById(pageId).classList.add('active');
+            
+            // Update navigation
+            document.querySelectorAll('.nav-links a').forEach(link => {
+                link.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            currentPage = pageId;
+            
+            // Close mobile menu
+            document.getElementById('navLinks').classList.remove('active');
+        }
+
+        // Mobile menu toggle
+        document.getElementById('mobileMenu').addEventListener('click', function() {
+            document.getElementById('navLinks').classList.toggle('active');
+        });
+
+        // Navbar scroll effect
+        window.addEventListener('scroll', function() {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // Modal functions
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Close modal when clicking outside
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    closeModal(modal.id);
+                }
+            });
+        });
+
+        // Transaction functions
+        function editTransaction(button) {
+            showMessage('Transaction edit functionality would open detailed form.', 'success');
+        }
+
+        function deleteTransaction(button) {
+            const card = button.closest('.transaction-card');
+            card.style.animation = 'slideInLeft 0.3s ease reverse';
+            setTimeout(() => {
+                card.remove();
+                showMessage('Transaction deleted successfully!', 'success');
+                updateFinancialStats();
+            }, 300);
+        }
+
+        function filterTransactions(type) {
+            const cards = document.querySelectorAll('.transaction-card');
+            cards.forEach(card => {
+                if (type === 'all') {
+                    card.style.display = 'block';
+                } else {
+                    if (card.classList.contains(type)) {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                }
+            });
+            showMessage(`Filtered to show ${type === 'all' ? 'all transactions' : type + ' transactions'}`, 'success');
+        }
+
+        // Budget functions
+        function editBudget(button) {
+            showMessage('Budget edit functionality would open detailed form.', 'success');
+        }
+
+        function addToBudget(button) {
+            const card = button.closest('.budget-card');
+            const category = card.querySelector('.budget-category').textContent;
+            showMessage(`Added $100 to ${category} budget!`, 'success');
+            
+            // Animate the progress bar
+            const progressBar = card.querySelector('.progress-bar');
+            const currentWidth = parseInt(progressBar.style.width);
+            const newWidth = Math.min(currentWidth + 5, 100);
+            progressBar.style.width = newWidth + '%';
+        }
+
+        // Investment functions
+        function buyMore(button) {
+            const card = button.closest('.investment-card');
+            const investment = card.querySelector('.investment-name').textContent;
+            showMessage(`Buy more functionality for ${investment} would open purchase form.`, 'success');
+        }
+
+        function sellInvestment(button) {
+            const card = button.closest('.investment-card');
+            const investment = card.querySelector('.investment-name').textContent;
+            showMessage(`Sell functionality for ${investment} would open sell form.`, 'success');
+        }
+
+        // Goal functions
+        function addToGoal(button) {
+            const card = button.closest('.goal-card');
+            const goal = card.querySelector('.goal-title').textContent;
+            showMessage(`Added $50 to ${goal}!`, 'success');
+            
+            // Animate the progress bar
+            const progressBar = card.querySelector('.progress-bar');
+            const currentWidth = parseInt(progressBar.style.width);
+            const newWidth = Math.min(currentWidth + 2, 100);
+            progressBar.style.width = newWidth + '%';
+        }
+
+        function editGoal(button) {
+            showMessage('Goal edit functionality would open detailed form.', 'success');
+        }
+
+        // Form submissions
+        document.getElementById('quickAddForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const type = document.getElementById('quickType').value;
+            const amount = document.getElementById('quickAmount').value;
+            const description = document.getElementById('quickDescription').value;
+            
+            showMessage(`${type.charAt(0).toUpperCase() + type.slice(1)} of $${amount} for "${description}" added successfully!`, 'success');
+            closeModal('quickAddModal');
+            this.reset();
+            updateFinancialStats();
+        });
+
+        document.getElementById('incomeForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const amount = document.getElementById('incomeAmount').value;
+            const source = document.getElementById('incomeSource').value;
+            
+            showMessage(`Income of $${amount} from "${source}" added successfully!`, 'success');
+            closeModal('incomeModal');
+            this.reset();
+            updateFinancialStats();
+        });
+
+        document.getElementById('expenseForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const amount = document.getElementById('expenseAmount').value;
+            const description = document.getElementById('expenseDescription').value;
+            
+            showMessage(`Expense of $${amount} for "${description}" added successfully!`, 'success');
+            closeModal('expenseModal');
+            this.reset();
+            updateFinancialStats();
+        });
+
+        document.getElementById('budgetForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const category = document.getElementById('budgetCategory').value;
+            const amount = document.getElementById('budgetAmount').value;
+            
+            showMessage(`Budget for "${category}" ($${amount}/month) created successfully!`, 'success');
+            closeModal('budgetModal');
+            this.reset();
+        });
+
+        document.getElementById('investmentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const symbol = document.getElementById('investmentSymbol').value;
+            const shares = document.getElementById('investmentShares').value;
+            
+            showMessage(`Investment in ${symbol} (${shares} shares) added successfully!`, 'success');
+            closeModal('investmentModal');
+            this.reset();
+            updateFinancialStats();
+        });
+
+        document.getElementById('goalForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('goalName').value;
+            const target = document.getElementById('goalTarget').value;
+            
+            showMessage(`Goal "${name}" ($${target}) created successfully!`, 'success');
+            closeModal('goalModal');
+            this.reset();
+        });
+
+        // Utility functions
+        function showMessage(text, type) {
+            const message = document.createElement('div');
+            message.className = `message message-${type}`;
+            message.textContent = text;
+            
+            document.body.appendChild(message);
+            
+            setTimeout(() => {
+                message.remove();
+            }, 3000);
+        }
+
+        function updateFinancialStats() {
+            // Simulate updating financial stats
+            const stats = {
+                totalIncome: '$' + (Math.random() * 1000 + 5000).toFixed(0),
+                totalExpenses: '$' + (Math.random() * 500 + 3000).toFixed(0),
+                totalSavings: '$' + (Math.random() * 500 + 1800).toFixed(0),
+                totalInvestments: '$' + (Math.random() * 2000 + 14000).toFixed(0)
+            };
+            
+            Object.keys(stats).forEach(key => {
+                const element = document.getElementById(key);
+                if (element) {
+                    element.textContent = stats[key];
+                }
+            });
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set default dates for forms
+            const today = new Date().toISOString().split('T')[0];
+            document.querySelectorAll('input[type="date"]').forEach(input => {
+                if (!input.value) {
+                    input.value = today;
+                }
+            });
+            
+            // Add some initial animations
+            setTimeout(() => {
+                document.querySelectorAll('.stat-card').forEach((card, index) => {
+                    setTimeout(() => {
+                        card.style.animation = 'slideInUp 0.6s ease forwards';
+                    }, index * 100);
+                });
+            }, 500);
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case '1':
+                        e.preventDefault();
+                        showPage('home');
+                        break;
+                    case '2':
+                        e.preventDefault();
+                        showPage('dashboard');
+                        break;
+                    case '3':
+                        e.preventDefault();
+                        showPage('transactions');
+                        break;
+                    case '4':
+                        e.preventDefault();
+                        showPage('budget');
+                        break;
+                    case '5':
+                        e.preventDefault();
+                        showPage('investments');
+                        break;
+                    case '6':
+                        e.preventDefault();
+                        showPage('goals');
+                        break;
+                }
+            }
+            
+            // Escape to close modals
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal.active').forEach(modal => {
+                    closeModal(modal.id);
+                });
+            }
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'977c1adac275ba5c',t:'MTc1NjYzODg3My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
